@@ -30,9 +30,8 @@ func main() {
 		log.Fatalf("Invalid sensor ID: %v", err)
 	}
 
-	// Create client
+	// Create client (uses PROD by default, set WHOOKTOWN_ENV=DEV for development)
 	client, err := whooktown.New(
-		whooktown.WithBaseURL("http://localhost"),
 		whooktown.WithToken(token),
 	)
 	if err != nil {

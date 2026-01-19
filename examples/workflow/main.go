@@ -18,9 +18,8 @@ func main() {
 		log.Fatal("WHOOKTOWN_TOKEN environment variable is required")
 	}
 
-	// Create client
+	// Create client (uses PROD by default, set WHOOKTOWN_ENV=DEV for development)
 	client, err := whooktown.New(
-		whooktown.WithBaseURL("http://localhost"),
 		whooktown.WithToken(token),
 		whooktown.WithTimeout(30*time.Second),
 	)

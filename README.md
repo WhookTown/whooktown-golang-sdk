@@ -1,6 +1,6 @@
 # whooktown-golang-sdk
 
-SDK Golang officiel pour [whooktown](https://whooktown.com) - la plateforme de visualisation d'infrastructure IT en ville 3D.
+Official Go SDK for [whooktown](https://whooktown.com) - the IT infrastructure visualization platform as a 3D city.
 
 ## Installation
 
@@ -8,7 +8,7 @@ SDK Golang officiel pour [whooktown](https://whooktown.com) - la plateforme de v
 go get github.com/fredericalix/whooktown-golang-sdk
 ```
 
-## Demarrage rapide
+## Quick Start
 
 ```go
 package main
@@ -16,16 +16,16 @@ package main
 import (
     "context"
     "log"
+    "os"
 
     whooktown "github.com/fredericalix/whooktown-golang-sdk"
     "github.com/gofrs/uuid"
 )
 
 func main() {
-    // Creer le client
+    // Create client (uses PROD by default, set WHOOKTOWN_ENV=DEV for development)
     client, err := whooktown.New(
-        whooktown.WithBaseURL("http://localhost"),
-        whooktown.WithToken("votre-token"),
+        whooktown.WithToken(os.Getenv("WHOOKTOWN_TOKEN")),
     )
     if err != nil {
         log.Fatal(err)
@@ -33,7 +33,7 @@ func main() {
 
     ctx := context.Background()
 
-    // Envoyer des donnees de capteur
+    // Send sensor data
     err = client.Sensors.Send(ctx, &whooktown.SensorData{
         ID:       uuid.Must(uuid.NewV4()),
         Status:   whooktown.StatusOnline,
@@ -47,103 +47,155 @@ func main() {
 
 ## Configuration
 
-### Options disponibles
+### Environments (PROD / DEV)
+
+By default, the SDK connects to **production** servers (`whook.town`). To use development servers, set the `WHOOKTOWN_ENV` environment variable:
+
+```bash
+# Production (default)
+export WHOOKTOWN_TOKEN="your-token"
+go run main.go
+
+# Development
+export WHOOKTOWN_ENV=DEV
+export WHOOKTOWN_TOKEN="your-token"
+go run main.go
+```
+
+**Production URLs** (default):
+| Service | URL |
+|---------|-----|
+| Auth | https://auth.whook.town |
+| Sensors | https://sensors.whook.town |
+| API (UI/Workflow) | https://api.whook.town |
+| SSE/WebSocket | https://ws.whook.town |
+| Backoffice | https://admin.whook.town |
+| Subscription | https://subscription.whook.town |
+| Audio Stream | https://stream.whook.town |
+
+**Development URLs** (`WHOOKTOWN_ENV=DEV`):
+| Service | URL |
+|---------|-----|
+| Auth | https://auth.dev.whook.town |
+| Sensors | https://sensors.dev.whook.town |
+| API (UI/Workflow) | https://api.dev.whook.town |
+| SSE/WebSocket | https://ws.dev.whook.town |
+| Backoffice | https://admin.dev.whook.town |
+| Subscription | https://subscription.dev.whook.town |
+| Audio Stream | https://stream.dev.whook.town |
+
+You can also set the environment programmatically:
 
 ```go
 client, err := whooktown.New(
-    // URL de base pour tous les services
-    whooktown.WithBaseURL("http://api.whooktown.com"),
+    whooktown.WithToken("your-token"),
+    whooktown.WithEnvironment(whooktown.EnvDevelopment), // Override WHOOKTOWN_ENV
+)
+```
 
-    // Token d'authentification
-    whooktown.WithToken("votre-token"),
+### Available Options
 
-    // Secret admin pour le backoffice
-    whooktown.WithAdminSecret("votre-secret"),
+```go
+client, err := whooktown.New(
+    // Authentication token
+    whooktown.WithToken("your-token"),
 
-    // Timeout HTTP
+    // Admin secret for backoffice
+    whooktown.WithAdminSecret("your-secret"),
+
+    // Environment (PROD or DEV) - overrides WHOOKTOWN_ENV
+    whooktown.WithEnvironment(whooktown.EnvProduction),
+
+    // HTTP timeout
     whooktown.WithTimeout(30 * time.Second),
 
-    // Configuration du retry
+    // Retry configuration
     whooktown.WithRetry(3, time.Second),
 
-    // Client HTTP personnalise
+    // Custom HTTP client
     whooktown.WithHTTPClient(customClient),
 
-    // Mode debug
+    // Debug mode
     whooktown.WithDebug(true),
 )
 ```
 
-### URLs de services individuelles
+### Individual Service URLs
+
+For custom deployments, you can override individual service URLs:
 
 ```go
 client, err := whooktown.New(
-    whooktown.WithAuthURL("http://auth.example.com:8981"),
-    whooktown.WithSensorURL("http://sensors.example.com:8081"),
-    whooktown.WithUIURL("http://ui.example.com:8083"),
-    whooktown.WithWorkflowURL("http://workflow.example.com:8084"),
-    whooktown.WithBackofficeURL("http://backoffice.example.com:8086"),
+    whooktown.WithToken("your-token"),
+    whooktown.WithAuthURL("https://auth.custom.example.com"),
+    whooktown.WithSensorURL("https://sensors.custom.example.com"),
+    whooktown.WithUIURL("https://api.custom.example.com"),
+    whooktown.WithWorkflowURL("https://api.custom.example.com"),
+    whooktown.WithBackofficeURL("https://admin.custom.example.com"),
+    whooktown.WithSSEURL("https://ws.custom.example.com"),
+    whooktown.WithSubscriptionURL("https://subscription.custom.example.com"),
+    whooktown.WithAudioStreamURL("https://stream.custom.example.com"),
 )
 ```
 
-## Clients disponibles
+## Available Clients
 
 ### Auth Client
 
-Gestion de l'authentification et des tokens.
+Authentication and token management.
 
 ```go
-// Inscription
+// Sign up
 token, err := client.Auth.Signup(ctx, &whooktown.SignupRequest{
     Email: "user@example.com",
     Type:  "user",
-    Name:  "Mon App",
+    Name:  "My App",
 })
 
-// Connexion
+// Login
 token, err := client.Auth.Login(ctx, &whooktown.LoginRequest{
     Email: "user@example.com",
     Type:  "user",
 })
 
-// Valider un token
-tokenInfo, err := client.Auth.CheckToken(ctx, "le-token")
+// Validate a token
+tokenInfo, err := client.Auth.CheckToken(ctx, "the-token")
 
-// Lister les tokens du compte
+// List account tokens
 tokens, err := client.Auth.ListTokens(ctx)
 
-// Creer un nouveau token
+// Create a new token
 newToken, err := client.Auth.CreateToken(ctx, &whooktown.CreateTokenRequest{
     Name: "API Token",
     Type: "sensor",
 })
 
-// Revoquer un token
-err = client.Auth.RevokeToken(ctx, "token-a-revoquer")
+// Revoke a token
+err = client.Auth.RevokeToken(ctx, "token-to-revoke")
 ```
 
 ### Sensors Client
 
-Envoi de donnees de capteurs.
+Send sensor data.
 
 ```go
-// Envoyer des donnees de capteur
+// Send sensor data
 err := client.Sensors.Send(ctx, &whooktown.SensorData{
     ID:       sensorID,
     Status:   whooktown.StatusOnline,
     Activity: whooktown.ActivityFast,
 })
 
-// Avec des champs specifiques au type de batiment
+// With building-specific fields
 err := client.Sensors.Send(ctx, &whooktown.SensorData{
-    ID:       dataCenterID,
-    Status:   whooktown.StatusOnline,
-    CPUUsage: 75,
-    RAMUsage: 60,
+    ID:          dataCenterID,
+    Status:      whooktown.StatusOnline,
+    CPUUsage:    75,
+    RAMUsage:    60,
     Temperature: 42,
 })
 
-// Envoyer des donnees brutes
+// Send raw data
 err := client.Sensors.SendRaw(ctx, map[string]interface{}{
     "id":       "sensor-uuid",
     "status":   "online",
@@ -154,12 +206,12 @@ err := client.Sensors.SendRaw(ctx, map[string]interface{}{
 
 ### UI Client
 
-Gestion des layouts.
+Layout management.
 
 ```go
-// Creer un layout
+// Create a layout
 layout, err := client.UI.CreateLayout(ctx, &whooktown.Layout{
-    Name: "Ma Ville",
+    Name: "My City",
     Grid: whooktown.Grid{Width: 10, Height: 10},
     Buildings: []whooktown.Building{
         {
@@ -170,25 +222,25 @@ layout, err := client.UI.CreateLayout(ctx, &whooktown.Layout{
     },
 })
 
-// Supprimer un layout
+// Delete a layout
 err = client.UI.DeleteLayout(ctx, layoutID)
 
-// Obtenir les quotas
+// Get quota information
 quota, err := client.UI.GetQuota(ctx)
 
-// Lister les scenes connectees
+// List connected scenes
 scenes, err := client.UI.ListScenes(ctx)
 ```
 
 ### Camera Client
 
-Controle de la camera.
+Camera control.
 
 ```go
-// Changer le mode camera
+// Change camera mode
 err := client.Camera.SetMode(ctx, layoutID, whooktown.CameraModeOrbit, 0)
 
-// Aller a une position
+// Set camera position
 err := client.Camera.SetPosition(ctx, layoutID,
     &whooktown.Vector3{X: 10, Y: 5, Z: 10},  // position
     &whooktown.Vector3{X: 0, Y: -45, Z: 0},  // rotation
@@ -197,29 +249,29 @@ err := client.Camera.SetPosition(ctx, layoutID,
     2.0,   // duration
 )
 
-// Utiliser un preset
+// Go to a preset
 err := client.Camera.GoToPreset(ctx, layoutID, presetID, true, 1.5)
 
-// Jouer un chemin de camera
+// Play a camera path
 err := client.Camera.PlayPath(ctx, layoutID, pathID)
 err := client.Camera.PausePath(ctx, layoutID)
 err := client.Camera.StopPath(ctx, layoutID)
 
-// Gerer les presets
+// Manage presets
 presets, err := client.Camera.ListPresets(ctx, layoutID)
 preset, err := client.Camera.CreatePreset(ctx, &whooktown.CreatePresetRequest{
     LayoutID:  layoutID,
-    Name:      "Vue principale",
+    Name:      "Main View",
     PositionX: 10, PositionY: 5, PositionZ: 10,
     RotationX: 0, RotationY: -45, RotationZ: 0,
 })
 err = client.Camera.DeletePreset(ctx, presetID)
 
-// Gerer les chemins
+// Manage paths
 paths, err := client.Camera.ListPaths(ctx, layoutID)
 path, err := client.Camera.CreatePath(ctx, &whooktown.CreatePathRequest{
     LayoutID: layoutID,
-    Name:     "Tour de ville",
+    Name:     "City Tour",
     Loop:     true,
 })
 path, err = client.Camera.AddCheckpoint(ctx, pathID, &whooktown.AddCheckpointRequest{
@@ -232,47 +284,47 @@ path, err = client.Camera.AddCheckpoint(ctx, pathID, &whooktown.AddCheckpointReq
 
 ### Traffic Client
 
-Controle du trafic.
+Traffic control.
 
 ```go
-// Configurer le trafic
+// Configure traffic
 err := client.Traffic.SetTraffic(ctx, layoutID,
     50,                     // density (0-100)
     whooktown.SpeedNormal,  // speed
     true,                   // enabled
 )
 
-// Changer uniquement la densite
+// Change only density
 err := client.Traffic.SetDensity(ctx, layoutID, 75)
 
-// Changer uniquement la vitesse
+// Change only speed
 err := client.Traffic.SetSpeed(ctx, layoutID, whooktown.SpeedFast)
 
-// Activer/desactiver
+// Enable/disable
 err := client.Traffic.Enable(ctx, layoutID)
 err := client.Traffic.Disable(ctx, layoutID)
 
-// Obtenir l'etat du trafic
+// Get traffic states
 states, err := client.Traffic.GetStates(ctx)
 ```
 
 ### Audio Client
 
-Controle audio.
+Audio control.
 
 ```go
-// Demarrer/arreter l'audio
+// Start/stop audio
 err := client.Audio.Play(ctx, layoutID)
 err := client.Audio.Stop(ctx, layoutID)
 
-// Changer le mood
+// Change mood
 err := client.Audio.SetMood(ctx, layoutID, whooktown.MoodTension)
 
-// Regler le volume (0-100)
+// Set volume (0-100)
 err := client.Audio.SetMusicVolume(ctx, layoutID, 80)
 err := client.Audio.SetSfxVolume(ctx, layoutID, 60)
 
-// Activer/desactiver
+// Enable/disable
 err := client.Audio.Enable(ctx, layoutID)
 err := client.Audio.Disable(ctx, layoutID)
 
@@ -283,14 +335,14 @@ err := client.Audio.DisableAutoMood(ctx, layoutID)
 
 ### Popup Client
 
-Controle des popups et labels.
+Popup and label control.
 
 ```go
 // Labels
 err := client.Popup.ShowLabels(ctx, layoutID)
 err := client.Popup.HideLabels(ctx, layoutID)
 
-// Details de batiments
+// Building details
 err := client.Popup.ShowDetail(ctx, layoutID, []string{buildingID1, buildingID2})
 err := client.Popup.CloseDetail(ctx, layoutID, []string{buildingID1})
 err := client.Popup.CloseAllDetails(ctx, layoutID)
@@ -298,37 +350,37 @@ err := client.Popup.CloseAllDetails(ctx, layoutID)
 
 ### Groups Client
 
-Gestion des groupes d'assets.
+Asset group management.
 
 ```go
-// Lister les groupes
+// List groups
 groups, err := client.Groups.ListGroups(ctx, layoutID)
 
-// Creer un groupe
+// Create a group
 group, err := client.Groups.CreateGroup(ctx, &whooktown.CreateGroupRequest{
     LayoutID: layoutID,
-    Name:     "Serveurs Web",
+    Name:     "Web Servers",
 })
 
-// Ajouter/retirer des membres
+// Add/remove members
 group, err = client.Groups.AddMember(ctx, groupID, buildingID)
 group, err = client.Groups.RemoveMember(ctx, groupID, buildingID)
 
-// Supprimer un groupe
+// Delete a group
 err = client.Groups.DeleteGroup(ctx, groupID)
 ```
 
 ### Workflow Client
 
-Gestion des workflows.
+Workflow management.
 
 ```go
-// Lister les workflows
+// List workflows
 workflows, err := client.Workflow.List(ctx)
 
-// Creer un workflow
+// Create a workflow
 workflow, err := client.Workflow.Create(ctx, &whooktown.CreateWorkflowRequest{
-    Name: "Mon Workflow",
+    Name: "My Workflow",
     Graph: map[string]*whooktown.FlowNode{
         "input1": whooktown.NewInputNode("input1", "sensor-id-1"),
         "input2": whooktown.NewInputNode("input2", "sensor-id-2"),
@@ -337,14 +389,14 @@ workflow, err := client.Workflow.Create(ctx, &whooktown.CreateWorkflowRequest{
     },
 })
 
-// Activer/desactiver
+// Enable/disable
 err = client.Workflow.Enable(ctx, workflowID)
 err = client.Workflow.Disable(ctx, workflowID)
 
-// Supprimer
+// Delete
 err = client.Workflow.Delete(ctx, workflowID)
 
-// Obtenir les operations disponibles
+// Get available operations
 operations, err := client.Workflow.GetOperations(ctx)
 ```
 
@@ -353,25 +405,25 @@ operations, err := client.Workflow.GetOperations(ctx)
 Administration.
 
 ```go
-// Creer le client avec le secret admin
+// Create client with admin secret
 client, _ := whooktown.New(
     whooktown.WithAdminSecret("admin-secret"),
 )
 
-// Statistiques
+// Statistics
 stats, err := client.Backoffice.GetStats(ctx)
 
-// Gestion des comptes
+// Account management
 accounts, err := client.Backoffice.ListAccounts(ctx)
 account, err := client.Backoffice.CreateAccount(ctx, &whooktown.CreateAccountRequest{
     Email: "new@example.com",
     Type:  "user",
 })
-err = client.Backoffice.LockAccount(ctx, accountID, "Raison du blocage")
+err = client.Backoffice.LockAccount(ctx, accountID, "Lock reason")
 err = client.Backoffice.UnlockAccount(ctx, accountID)
 err = client.Backoffice.DeleteAccount(ctx, accountID)
 
-// Gestion des tokens
+// Token management
 tokens, err := client.Backoffice.ListAccountTokens(ctx, accountID)
 token, err := client.Backoffice.CreateAccountToken(ctx, accountID, &whooktown.CreateAccountTokenRequest{
     Type: "sensor",
@@ -379,42 +431,42 @@ token, err := client.Backoffice.CreateAccountToken(ctx, accountID, &whooktown.Cr
 })
 err = client.Backoffice.DeleteToken(ctx, tokenString)
 
-// Gestion des subscriptions
+// Subscription management
 stats, err := client.Backoffice.GetSubscriptionStats(ctx)
 plans, err := client.Backoffice.ListPlans(ctx)
 sub, err := client.Backoffice.UpdateAccountSubscription(ctx, accountID, "premium")
 ```
 
-## Gestion des erreurs
+## Error Handling
 
 ```go
 err := client.Sensors.Send(ctx, data)
 if err != nil {
     if whooktown.IsUnauthorized(err) {
-        // Token invalide ou expire
-        log.Println("Veuillez vous reconnecter")
+        // Invalid or expired token
+        log.Println("Please reconnect")
     } else if whooktown.IsQuotaExceeded(err) {
-        // Quota depasse
-        log.Println("Limite atteinte, mettez a jour votre plan")
+        // Quota exceeded
+        log.Println("Limit reached, please upgrade your plan")
     } else if whooktown.IsNotFound(err) {
-        // Ressource non trouvee
-        log.Println("Ressource introuvable")
+        // Resource not found
+        log.Println("Resource not found")
     } else {
-        log.Printf("Erreur: %v", err)
+        log.Printf("Error: %v", err)
     }
 }
 ```
 
-## Types de statuts
+## Status Types
 
 ```go
-whooktown.StatusOnline   // "online" - Service operationnel
-whooktown.StatusOffline  // "offline" - Service arrete
-whooktown.StatusWarning  // "warning" - Service degrade
-whooktown.StatusCritical // "critical" - Service en erreur
+whooktown.StatusOnline   // "online" - Service operational
+whooktown.StatusOffline  // "offline" - Service stopped
+whooktown.StatusWarning  // "warning" - Service degraded
+whooktown.StatusCritical // "critical" - Service in error state
 ```
 
-## Types d'activite
+## Activity Types
 
 ```go
 whooktown.ActivitySlow   // "slow"
@@ -422,38 +474,38 @@ whooktown.ActivityNormal // "normal"
 whooktown.ActivityFast   // "fast"
 ```
 
-## Moods audio
+## Audio Moods
 
 ```go
-whooktown.MoodCalm     // "calm" - Atmosphere calme
-whooktown.MoodActive   // "active" - Atmosphere active
-whooktown.MoodTension  // "tension" - Atmosphere tendue
-whooktown.MoodCritical // "critical" - Atmosphere critique
-whooktown.MoodEpic     // "epic" - Atmosphere epique
+whooktown.MoodCalm     // "calm" - Calm atmosphere
+whooktown.MoodActive   // "active" - Active atmosphere
+whooktown.MoodTension  // "tension" - Tense atmosphere
+whooktown.MoodCritical // "critical" - Critical atmosphere
+whooktown.MoodEpic     // "epic" - Epic atmosphere
 ```
 
-## Types de batiments
+## Building Types
 
 ```go
-whooktown.BuildingWindmill      // Turbine eolienne
-whooktown.BuildingDataCenter    // Centre de donnees
-whooktown.BuildingArcade        // Salle de jeux
-whooktown.BuildingPyramid       // Pyramide
-whooktown.BuildingTowerA        // Tour de communication A
-whooktown.BuildingTowerB        // Tour de communication B
-whooktown.BuildingSupervisor    // Station de surveillance
-whooktown.BuildingBank          // Banque
-whooktown.BuildingMonitorTube   // Tube de monitoring
-whooktown.BuildingBakery        // Boulangerie
-whooktown.BuildingHouseA        // Habitation A
-whooktown.BuildingHouseB        // Habitation B
-whooktown.BuildingHouseC        // Habitation C
-whooktown.BuildingTree          // Arbre holographique
-whooktown.BuildingDisplayA      // Ecran d'affichage
-whooktown.BuildingTrafficLight  // Feu de circulation
-// ... et plus encore
+whooktown.BuildingWindmill      // Wind turbine
+whooktown.BuildingDataCenter    // Data center
+whooktown.BuildingArcade        // Arcade
+whooktown.BuildingPyramid       // Pyramid
+whooktown.BuildingTowerA        // Communication tower A
+whooktown.BuildingTowerB        // Communication tower B
+whooktown.BuildingSupervisor    // Monitoring station
+whooktown.BuildingBank          // Bank
+whooktown.BuildingMonitorTube   // Monitor tube
+whooktown.BuildingBakery        // Bakery
+whooktown.BuildingHouseA        // Housing A
+whooktown.BuildingHouseB        // Housing B
+whooktown.BuildingHouseC        // Housing C
+whooktown.BuildingTree          // Holographic tree
+whooktown.BuildingDisplayA      // Display screen
+whooktown.BuildingTrafficLight  // Traffic light
+// ... and more
 ```
 
 ## License
 
-MIT License - voir [LICENSE](LICENSE) pour plus de details.
+MIT License - see [LICENSE](LICENSE) for details.
