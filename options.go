@@ -25,7 +25,6 @@ const (
 	ProdBackofficeURL   = "https://admin.whook.town"
 	ProdSSEURL          = "https://ws.whook.town"
 	ProdSubscriptionURL = "https://subscription.whook.town"
-	ProdAudioStreamURL  = "https://stream.whook.town"
 )
 
 // Development URLs
@@ -37,7 +36,6 @@ const (
 	DevBackofficeURL   = "https://admin.dev.whook.town"
 	DevSSEURL          = "https://ws.dev.whook.town"
 	DevSubscriptionURL = "https://subscription.dev.whook.town"
-	DevAudioStreamURL  = "https://stream.dev.whook.town"
 )
 
 // Config holds the client configuration
@@ -50,7 +48,6 @@ type Config struct {
 	BackofficeURL   string
 	SSEURL          string
 	SubscriptionURL string
-	AudioStreamURL  string
 
 	// Authentication
 	Token       string // Bearer token for user authentication
@@ -100,7 +97,6 @@ func configForEnvironment(env Environment) Config {
 		cfg.BackofficeURL = DevBackofficeURL
 		cfg.SSEURL = DevSSEURL
 		cfg.SubscriptionURL = DevSubscriptionURL
-		cfg.AudioStreamURL = DevAudioStreamURL
 	} else {
 		cfg.AuthURL = ProdAuthURL
 		cfg.SensorURL = ProdSensorURL
@@ -109,7 +105,6 @@ func configForEnvironment(env Environment) Config {
 		cfg.BackofficeURL = ProdBackofficeURL
 		cfg.SSEURL = ProdSSEURL
 		cfg.SubscriptionURL = ProdSubscriptionURL
-		cfg.AudioStreamURL = ProdAudioStreamURL
 	}
 
 	return cfg
@@ -132,7 +127,6 @@ func WithEnvironment(env Environment) Option {
 		c.BackofficeURL = envCfg.BackofficeURL
 		c.SSEURL = envCfg.SSEURL
 		c.SubscriptionURL = envCfg.SubscriptionURL
-		c.AudioStreamURL = envCfg.AudioStreamURL
 	}
 }
 
@@ -228,13 +222,6 @@ func WithSubscriptionURL(url string) Option {
 	}
 }
 
-// WithAudioStreamURL sets the audio streaming service URL
-func WithAudioStreamURL(url string) Option {
-	return func(c *Config) {
-		c.AudioStreamURL = url
-	}
-}
-
 // WithBaseURL sets all service URLs from a single base URL (for custom deployments)
 // Note: This is for custom deployments only. Use WithEnvironment for standard PROD/DEV.
 func WithBaseURL(baseURL string) Option {
@@ -246,7 +233,6 @@ func WithBaseURL(baseURL string) Option {
 		c.BackofficeURL = baseURL
 		c.SSEURL = baseURL
 		c.SubscriptionURL = baseURL
-		c.AudioStreamURL = baseURL
 	}
 }
 

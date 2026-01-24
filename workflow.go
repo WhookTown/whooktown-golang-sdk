@@ -193,19 +193,6 @@ func NewTrafficControlNode(id, layoutID string, density int, speed string, enabl
 	}
 }
 
-// NewAudioControlNode creates an audio control node
-func NewAudioControlNode(id, layoutID, command, mood string, musicVolume int, inputs []string) *FlowNode {
-	return &FlowNode{
-		ID:          id,
-		Operator:    "audio_control",
-		Inputs:      inputs,
-		LayoutID:    layoutID,
-		Command:     command,
-		Mood:        mood,
-		MusicVolume: musicVolume,
-	}
-}
-
 // NewCameraControlNode creates a camera control node
 func NewCameraControlNode(id, layoutID, pathID, action string, inputs []string) *FlowNode {
 	return &FlowNode{

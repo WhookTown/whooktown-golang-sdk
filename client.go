@@ -15,7 +15,6 @@ type Client struct {
 	UI         *UIClient
 	Camera     *CameraClient
 	Traffic    *TrafficClient
-	Audio      *AudioClient
 	Popup      *PopupClient
 	Groups     *GroupsClient
 	Workflow   *WorkflowClient
@@ -67,7 +66,6 @@ func New(opts ...Option) (*Client, error) {
 	c.UI = &UIClient{http: uiHTTP}
 	c.Camera = &CameraClient{http: uiHTTP}
 	c.Traffic = &TrafficClient{http: uiHTTP}
-	c.Audio = &AudioClient{http: uiHTTP}
 	c.Popup = &PopupClient{http: uiHTTP}
 	c.Groups = &GroupsClient{http: uiHTTP}
 	c.Workflow = &WorkflowClient{http: workflowHTTP}
@@ -84,7 +82,6 @@ func (c *Client) SetToken(token string) {
 	c.UI.http.SetToken(token)
 	c.Camera.http.SetToken(token)
 	c.Traffic.http.SetToken(token)
-	c.Audio.http.SetToken(token)
 	c.Popup.http.SetToken(token)
 	c.Groups.http.SetToken(token)
 	c.Workflow.http.SetToken(token)

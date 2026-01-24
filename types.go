@@ -58,17 +58,6 @@ const (
 	OrientationNW Orientation = "NW"
 )
 
-// Mood represents audio mood
-type Mood string
-
-const (
-	MoodCalm     Mood = "calm"
-	MoodActive   Mood = "active"
-	MoodTension  Mood = "tension"
-	MoodCritical Mood = "critical"
-	MoodEpic     Mood = "epic"
-)
-
 // BuildingType constants for all supported building types
 const (
 	BuildingWindmill      = "windmill"
@@ -347,16 +336,6 @@ type TrafficState struct {
 	Speed         string `json:"speed"`
 	Enabled       bool   `json:"enabled"`
 	LabelsVisible bool   `json:"labels_visible"`
-}
-
-// AudioState represents audio control state
-type AudioState struct {
-	LayoutID    string `json:"layout_id"`
-	Enabled     bool   `json:"enabled"`
-	MusicVolume int    `json:"music_volume"`
-	SfxVolume   int    `json:"sfx_volume"`
-	CurrentMood string `json:"current_mood"`
-	AutoMood    bool   `json:"auto_mood"`
 }
 
 // QuotaInfo represents account quota information
