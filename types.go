@@ -381,9 +381,6 @@ type FlowNode struct {
 	Density     int    `json:"density,omitempty"`
 	Speed       string `json:"speed,omitempty"`
 	Enabled     *bool  `json:"enabled,omitempty"`
-	Command     string `json:"command,omitempty"`
-	Mood        string `json:"mood,omitempty"`
-	MusicVolume int    `json:"music_volume,omitempty"`
 	PathID      string `json:"path_id,omitempty"`
 	Action      string `json:"action,omitempty"`
 	GroupID     string `json:"group_id,omitempty"`

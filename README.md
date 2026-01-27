@@ -71,7 +71,6 @@ go run main.go
 | SSE/WebSocket | https://ws.whook.town |
 | Backoffice | https://admin.whook.town |
 | Subscription | https://subscription.whook.town |
-| Audio Stream | https://stream.whook.town |
 
 **Development URLs** (`WHOOKTOWN_ENV=DEV`):
 | Service | URL |
@@ -82,7 +81,6 @@ go run main.go
 | SSE/WebSocket | https://ws.dev.whook.town |
 | Backoffice | https://admin.dev.whook.town |
 | Subscription | https://subscription.dev.whook.town |
-| Audio Stream | https://stream.dev.whook.town |
 
 You can also set the environment programmatically:
 
@@ -134,7 +132,6 @@ client, err := whooktown.New(
     whooktown.WithBackofficeURL("https://admin.custom.example.com"),
     whooktown.WithSSEURL("https://ws.custom.example.com"),
     whooktown.WithSubscriptionURL("https://subscription.custom.example.com"),
-    whooktown.WithAudioStreamURL("https://stream.custom.example.com"),
 )
 ```
 
@@ -308,31 +305,6 @@ err := client.Traffic.Disable(ctx, layoutID)
 states, err := client.Traffic.GetStates(ctx)
 ```
 
-### Audio Client
-
-Audio control.
-
-```go
-// Start/stop audio
-err := client.Audio.Play(ctx, layoutID)
-err := client.Audio.Stop(ctx, layoutID)
-
-// Change mood
-err := client.Audio.SetMood(ctx, layoutID, whooktown.MoodTension)
-
-// Set volume (0-100)
-err := client.Audio.SetMusicVolume(ctx, layoutID, 80)
-err := client.Audio.SetSfxVolume(ctx, layoutID, 60)
-
-// Enable/disable
-err := client.Audio.Enable(ctx, layoutID)
-err := client.Audio.Disable(ctx, layoutID)
-
-// Auto-mood
-err := client.Audio.EnableAutoMood(ctx, layoutID)
-err := client.Audio.DisableAutoMood(ctx, layoutID)
-```
-
 ### Popup Client
 
 Popup and label control.
@@ -472,16 +444,6 @@ whooktown.StatusCritical // "critical" - Service in error state
 whooktown.ActivitySlow   // "slow"
 whooktown.ActivityNormal // "normal"
 whooktown.ActivityFast   // "fast"
-```
-
-## Audio Moods
-
-```go
-whooktown.MoodCalm     // "calm" - Calm atmosphere
-whooktown.MoodActive   // "active" - Active atmosphere
-whooktown.MoodTension  // "tension" - Tense atmosphere
-whooktown.MoodCritical // "critical" - Critical atmosphere
-whooktown.MoodEpic     // "epic" - Epic atmosphere
 ```
 
 ## Building Types
